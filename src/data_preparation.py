@@ -4,6 +4,9 @@ from transformers import (
     WhisperTokenizerFast,
     WhisperProcessor,
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def load_whisper_utils(whisper_model_id: str):
@@ -44,11 +47,13 @@ def prepare_hf_dataset_whisper(
 
     processed_hf_dataset = raw_hf_dataset.remove_columns(useless_hf_columns)
 
-    # Sampling rate used by Whisper
+    logger.debug(
+        "--- Ensuring the sampling rate corresponds "
+        + f"to the one used by Whisper : {sampling_rate_whsiper} ---"
+    )
     processed_hf_dataset = processed_hf_dataset.cast_column(
         audio_column_name, Audio(sampling_rate=sampling_rate_whsiper)
     )
-    print(processed_hf_dataset)
     if merged_train_val_bool:
         processed_hf_dataset["train"] = concatenate_datasets(
             [
@@ -97,11 +102,14 @@ def load_and_prepare_afrispeech_hf_dataset(
     huggingface_dataset_name: str = "tobiolatunji/afrispeech-200",
     subsample_selector: str = "isizulu",
 ):
-
+    logger.info(
+        f"--- Loading HugginFace Dataset  : {huggingface_dataset_name} ---"
+    )
     afrispeech_dataset = load_dataset(
         huggingface_dataset_name, subsample_selector, **hf_dataset_args
     )
 
+    logger.info("-- Processing the dataset for Whisper fine-tuning ---")
     afrispeech_dataset_processed = prepare_hf_dataset_whisper(
         raw_hf_dataset=afrispeech_dataset,
         whisper_feature_extractor=whisper_feature_extractor,
@@ -122,7 +130,3 @@ if __name__ == "__main__":
         huggingface_dataset_name="tobiolatunji/afrispeech-200",
         subsample_selector="isizulu",
     )
-    print(processed_afrispeech["train"])
-    print(processed_afrispeech["test"])
-
-    # dataloader = DataLoader(afrispeech, batch_sampler=batch_sampler)
