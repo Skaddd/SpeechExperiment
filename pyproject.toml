@@ -1,0 +1,27 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "SpeechExperiement"
+version = "0.1.0"
+description = ""
+authors = ["Matéo LEBRUN <mateo.lebrun@telecomnancy.net>"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+transformers = "^4.41.2"
+datasets = "^2.19.2"
+torch = "^2.3.1"
+soundfile = "^0.12.1"
+ipykernel = "^6.29.4"
+librosa = "^0.10.2.post1"
+accelerate = "^0.31.0"
+torchaudio = "^2.3.1"
+
+
+
+[tool.black]
+line-length = 79
