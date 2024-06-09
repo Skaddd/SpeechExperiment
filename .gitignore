@@ -166,5 +166,10 @@ cython_debug/
 
 # remove possible data files
 
-data/*
 weights/*
+data/*
+results/*
+
+!data/.gitkeep
+!weights/.gitkeep
+!results/.gitkeep
