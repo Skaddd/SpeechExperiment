@@ -1,5 +1,13 @@
 ---
-model_id: openai/whisper-tiny
+model_id: openai/whisper-medium
+
+# not yet used
+afrispeech_dataset:
+  hf_identifier: "tobiolatunji/afrispeech-200"
+  name: "isizulu"
+  trust_remote_code : True
+
+
 whisper_training:
   lora_config:
     bias: none
@@ -15,7 +23,8 @@ whisper_training:
     warmup_steps: 50
     num_train_epochs: 1
     evaluation_strategy: "steps"
+    gradient_checkpointing: True
+    overwrite_output_dir : True
     fp16: True
-    generation_max_length: 128
-    logging_steps: 100
-    output_dir: "results/"
+    logging_steps: 5
+    output_dir: "results/peft-whisper-training"
