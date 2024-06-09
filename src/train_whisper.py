@@ -1,6 +1,8 @@
 import logging
+from typing import Any
 
 import torch
+from datasets import Dataset
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from transformers import (
     BitsAndBytesConfig,
@@ -9,14 +11,8 @@ from transformers import (
     WhisperForConditionalGeneration,
 )
 
-from data_preparation import load_whisper_utils
 from utils.helpers import display_linear_modules
-from utils.prep_utils import (
-    DataCollatorSpeechSeq2SeqWithPadding,
-    SavePeftModelCallback,
-)
-from typing import Any
-from datasets import Dataset
+from utils.prep_utils import SavePeftModelCallback
 
 logger = logging.getLogger(__name__)
 
@@ -73,8 +69,9 @@ def load_whisper_checkpoint(
 
 
 def train_model(
-    whisper_loaded_model,
+    whisper_checkpoint,
     seqtoseq_training_args: dict[str, Any],
+    data_collator: Any,
     training_dataset: Dataset,
     val_dataset: Dataset,
 ) -> None:
@@ -83,7 +80,7 @@ def train_model(
     This function launch a huggingFace Trainer and
     use a PeFT callback to follow performances during training.
     Args:
-        whisper_loaded_model (_type_): whisper checkpoint.
+        whisper_checkpoint (_type_): whisper checkpoint.
         seqtoseq_training_args (dict[str, Any]): Training args.
         training_dataset (Dataset): Training dataset.
         val_dataset (Dataset): Validation dataset.
@@ -107,29 +104,11 @@ def train_model(
 
     trainer = Seq2SeqTrainer(
         args=training_args,
-        model=whisper_loaded_model,
+        model=whisper_checkpoint,
         train_dataset=training_dataset,
         eval_dataset=val_dataset,
         data_collator=data_collator,
         callbacks=[peft_callback],
     )
-    whisper_loaded_model.config.use_cache = False
+    whisper_checkpoint.config.use_cache = False
     trainer.train()
-
-
-if __name__ == "__main__":
-
-    tokenizer, feature_extractor, processor = load_whisper_utils(
-        "openai/whisper-tiny"
-    )
-    lora_config = {
-        "r": 16,
-        "lora_alpha": 32,
-        "target_modules": ["q_proj", "v_proj"],
-        "lora_dropout": 0.05,
-        "bias": "none",
-    }
-
-    data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor)
-
-    load_whisper_checkpoint("openai/whisper-tiny", lora_config)

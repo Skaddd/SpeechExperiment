@@ -190,17 +190,3 @@ def load_and_prepare_afrispeech_hf_dataset(
         whisper_tokenizer=whisper_tokenizer,
     )
     return afrispeech_dataset_processed
-
-
-if __name__ == "__main__":
-
-    tokenizer, feature_extractor, processsor = load_whisper_utils(
-        "openai/whisper-tiny"
-    )
-    processed_afrispeech = load_and_prepare_afrispeech_hf_dataset(
-        whisper_feature_extractor=feature_extractor,
-        whisper_tokenizer=tokenizer,
-        hf_dataset_args={"trust_remote_code": True},
-        huggingface_dataset_name="tobiolatunji/afrispeech-200",
-        subsample_selector="isizulu",
-    )
