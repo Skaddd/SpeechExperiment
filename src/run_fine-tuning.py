@@ -1,13 +1,17 @@
-from data_preparation import (
-    load_whisper_utils,
-    load_and_prepare_afrispeech_hf_dataset,
-)
-from train_whisper import load_whisper_checkpoint, train_model
+import logging
+import os
 
+import yaml
+
+from data_preparation import (load_and_prepare_afrispeech_hf_dataset,
+                              load_whisper_utils)
+from eval_whisper import eval_checkpoint_model
+from train_whisper import load_whisper_checkpoint, train_model
+from utils.helpers import setup_logging
 from utils.prep_utils import DataCollatorSpeechSeq2SeqWithPadding
 
-import os
-import yaml
+logger = logging.getLogger(__name__)
+setup_logging()
 
 
 def load_train_config():
@@ -44,11 +48,17 @@ if __name__ == "__main__":
         whisper_model_id=config_params["model_id"],
         lora_config_parameters=training_params["lora_config"],
     )
-    # Using Trainer to FIne-tune Whisper
+    # Using Trainer to Fine-tune Whisper
     train_model(
         whisper_checkpoint=whisper_checkpoint,
         seqtoseq_training_args=training_params["training_args"],
         data_collator=data_collator,
         training_dataset=processed_afrispeech["train"],
         val_dataset=processed_afrispeech["val"],
+    )
+    eval_checkpoint_model(
+        checkpoint_model=whisper_checkpoint,
+        validation_dataset=processed_afrispeech["test"],
+        data_collator=data_collator,
+        whisper_processor=processor,
     )

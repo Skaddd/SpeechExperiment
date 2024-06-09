@@ -39,6 +39,7 @@ def load_whisper_checkpoint(
     quantization_config = BitsAndBytesConfig(
         load_in_8bit=True,
         bnb_4bit_compute_dtype=torch.bfloat16,
+        bnb_4bit_quant_type='nf4',
     )
 
     whisper_model = WhisperForConditionalGeneration.from_pretrained(

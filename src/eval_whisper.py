@@ -1,15 +1,15 @@
 import logging
 
+import numpy as np
 import torch
-from datasets import load_dataset, Dataset
+from datasets import Dataset
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 
-from utils.helpers import setup_logging
 from utils.metric_utils import compute_wer
 
 logger = logging.getLogger(__name__)
-setup_logging()
 
 
 def load_baseline_whisper_model(
@@ -82,6 +82,7 @@ def eval_baseline_model(
     Returns:
         dict[str, float]: WER and WER-normalised computed.
     """
+    logger.info("--- Launch Baseline Whisper Evaluation ---")
 
     predictions = []
     references = []
@@ -100,11 +101,66 @@ def eval_baseline_model(
     )
 
 
-if __name__ == "__main__":
-    validation_dataset = load_dataset(
-        "tobiolatunji/afrispeech-200", "isizulu", split="test"
+def eval_checkpoint_model(
+    checkpoint_model: torch.nn.Module,
+    validation_dataset: Dataset,
+    data_collator,
+    whisper_processor,
+) -> dict[str, int]:
+    """Compute WER metrics on Fine-tuned Whisper model.
+
+    Args:
+        checkpoint_model (torch.nn.Module): Whisper checkpoint model.
+        validation_dataset (Dataset): dataset used to compute metrics
+        on unseen data.
+        data_collator (_type_): data collator to preprocess data
+            before feeding it to the model.
+        whisper_processor (_type_): Whisper pretrained processsor to
+            encode inputs.
+
+    Returns:
+        dict[str, int]: computed metrics
+    """
+
+    logger.info("--- Launch Whisper FIne-tuned evaluation ---")
+
+    forced_decoder_ids = whisper_processor.get_decoder_prompt_ids(
+        language="english", task="transcribe"
     )
 
-    whisper_pipeline = load_baseline_whisper_model("openai/whisper-tiny")
+    predictions = []
+    references = []
+    validation_dataloader = DataLoader(
+        validation_dataset, batch_size=16, collate_fn=data_collator
+    )
 
-    eval_baseline_model(whisper_pipeline, validation_dataset)
+    for _, sample in enumerate(tqdm(validation_dataloader)):
+
+        with torch.no_grad():
+            generated_tokens = (
+                checkpoint_model.generate(
+                    input_features=sample["input_features"].to("cuda"),
+                    forced_decoder_ids=forced_decoder_ids,
+                    max_new_tokens=255,
+                )
+                .cpu()
+                .numpy()
+            )
+            labels = sample["labels"].cpu().numpy()
+            labels = np.where(
+                labels != -100,
+                labels,
+                whisper_processor.tokenizer.pad_token_id,
+            )
+            decoded_preds = whisper_processor.tokenizer.batch_decode(
+                generated_tokens, skip_special_tokens=True
+            )
+            decoded_labels = whisper_processor.tokenizer.batch_decode(
+                labels, skip_special_tokens=True
+            )
+            predictions.extend(decoded_preds)
+            references.extend(decoded_labels)
+
+    return compute_wer(
+        list_predictions=predictions, list_references=references
+    )
