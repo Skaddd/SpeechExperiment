@@ -3,8 +3,8 @@
 This repository explore 3 typical usescases that leverages on ASR technologies and techniques :
 
 
-1. [**Build a VAD**](./whisper-finetuning/README.md): *Implement and evaluate/test a VAD system from scratch.  The system implemented is also evaluted by carefully selecting relevant metrics and datasets.*
-2. [**Fine-tune a whisper model**](./vad-implementation/README.md): *Implement a training script with the goal to fine-tune a whisper based on a specific language of your choice. The script must be optimised for a fast inference time on GPU*
+1. [**Build a VAD**](./vad-implementation/README.md): *Implement and evaluate/test a VAD system from scratch.  The system implemented is also evaluted by carefully selecting relevant metrics and datasets.*
+2. [**Fine-tune a whisper model**](./whisper-finetuning/README.md): *Implement a training script with the goal to fine-tune a whisper based on a specific language of your choice. The script must be optimised for a fast inference time on GPU*
 
 3. [**Whisper/Canary 1B streaming**](./whisper-streaming/README.md): *Implement a real-time transcription system with the least possible delay and the highest possible perfomance. Then evaluate the system on audio files and Then implement multi-processing/multi-threaded scripts*
  
