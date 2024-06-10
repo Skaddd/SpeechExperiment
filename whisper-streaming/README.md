@@ -6,7 +6,7 @@ This assignement aimed at implementing a real-time transcription system with the
  Then developing an evaluation pipeline on any given dataset, to evaluate and compare the system produced. Finally to answer large volumes of calls the last objective was to enhance the current system to make it work on multiple audios at the same time using `multi-processing/multi-threading` routines.
 
 
-First the [faster-whisper](https://github.com/SYSTRAN/faster-whisper/tree/master) implementation was rapidly selected for its performances and its possibility to run on CPU ! Indeed, having a working system was essential for testing purposes, thus i also focused on selecting an implementation would actually work on any given device.
+First the [faster-whisper](https://github.com/SYSTRAN/faster-whisper/tree/master) implementation was rapidly selected for its performances and its possibility to run on CPU ! Indeed, having a working system was essential for testing purposes, thus i also focused on selecting an implementation would actually work on any given device. Since i only had access to a CPU device (excluding colab).
 
 
 > NOTE: **With this additional constraint, several real-time whisper implementation were not selected because of their GPU requirements.** [WhisperLive](https://github.com/collabora/WhisperLive/tree/main)
