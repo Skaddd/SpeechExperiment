@@ -1,7 +1,7 @@
 # Whisper Streaming
 This assignement aimed at implementing a real-time transcription system with the best possible performances : 
 - Least delay
-- Highest WER
+- Lowest WER
  
  Then developing an evaluation pipeline on any given dataset, to evaluate and compare the system produced. Finally to answer large volumes of calls the last objective was to enhance the current system to make it work on multiple audios at the same time using `multi-processing/multi-threading` routines.
 
